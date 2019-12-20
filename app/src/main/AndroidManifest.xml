@@ -28,6 +28,7 @@
             <data android:mimeType="text/*"/>
         </intent-filter></activity>
         <activity android:name=".UserInfoActivity"></activity>
+        <activity android:name=".AuthenticationActivity"></activity>
 
     </application>
 
