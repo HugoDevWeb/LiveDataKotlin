@@ -6,13 +6,13 @@ import retrofit2.http.Multipart
 
 data class UserInfo(
     @field:Json(name = "email")
-    val email: String,
+    val email: String? = null,
     @field:Json(name = "firstname")
     val firstname: String,
     @field:Json(name = "lastname")
     val lastname: String,
     @field:Json(name="avatar")
-    val avatar: String
+    val avatar: String? = ""
 
 )
 

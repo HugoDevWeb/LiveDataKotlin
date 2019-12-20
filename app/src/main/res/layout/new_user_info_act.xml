@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -7,7 +8,8 @@
         android:id="@+id/image_view_act"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/zeaeazeaz" />
+        android:contentDescription="@string/zeaeazeaz"
+        tools:srcCompat="@tools:sample/avatars" />
 
     <Button
         android:id="@+id/upload_image_button"
@@ -19,7 +21,40 @@
         android:id="@+id/take_picture_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/prendre_une_photo"
+        android:layout_marginBottom="25dp"
 
+        android:text="@string/prendre_une_photo" />
+
+    <EditText
+        android:id="@+id/edit_lastname_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:importantForAutofill="no" />
+
+    <EditText
+        android:id="@+id/edit_firstname_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:importantForAutofill="no"
         />
+
+    <EditText
+        android:id="@+id/edit_email_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:importantForAutofill="no" />
+
+
+    <Button
+        android:id="@+id/update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sauvegarder_ces_donn_es" />
+
 </LinearLayout>

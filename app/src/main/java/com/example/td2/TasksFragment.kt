@@ -124,7 +124,7 @@ class TasksFragment : Fragment() {
         viewModel.loadTasks()
         lifecycleScope.launch {
             val userInfo = Api.userService.getInfo().body()
-            text_api.text = "${userInfo?.firstname} ${userInfo?.lastname}"
+            text_api.text = "${userInfo?.firstname} ${userInfo?.lastname} "
             glide.load(userInfo?.avatar)
                 .circleCrop()
                 .override(500, 500)

@@ -6,19 +6,17 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.example.td2.network.Api
-import com.example.td2.network.UserService
 import kotlinx.android.synthetic.main.new_user_info_act.*
-import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -40,15 +38,35 @@ class UserInfoActivity<fragment> : AppCompatActivity() {
         take_picture_button.setOnClickListener{
             askCameraPermissionAndOpenCamera()
         }
+        upload_image_button.setOnClickListener{
+            askGalleryPermissionAndOpenGallery()
+        }
+        update.setOnClickListener{
+            viewModel.update(firstname =  edit_firstname_info.text.toString(),
+                lastname =  edit_lastname_info.text.toString(),
+                email = edit_email_info.text.toString())
+        }
 
+        viewModel.userLiveData.observe(this, Observer { userInfo ->
+            edit_firstname_info.setText(userInfo?.firstname)
+            edit_lastname_info.setText(userInfo?.lastname)
+            edit_email_info.setText(userInfo?.email)
 
+            Glide.with(this).load(userInfo?.avatar)
+                .circleCrop()
+                .override(500, 500)
+                .into(image_view_act)
+        })
 
     }
+
+
+
 
     private fun askCameraPermissionAndOpenCamera(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)){
-                showDialogBeforeRequest()
+                showDialogBeforeRequest { requestCameraPermission() }
             }
             else {
                 requestCameraPermission()
@@ -58,13 +76,32 @@ class UserInfoActivity<fragment> : AppCompatActivity() {
         else {
             openCamera()
         }
+
+
     }
 
 
-    private fun showDialogBeforeRequest(){
+    private fun askGalleryPermissionAndOpenGallery() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
+                showDialogBeforeRequest { requestGalleryPermission() }
+            }
+            else {
+                requestGalleryPermission()
+            }
+
+        }
+        else {
+            openGallery()
+        }
+
+    }
+
+
+    private fun showDialogBeforeRequest(callback: () -> Unit){
         AlertDialog.Builder(this).apply {
             setMessage("EHH Passe la caméra chacal et un coca bien frais")
-            setPositiveButton(android.R.string.ok) { _, _ -> requestCameraPermission()}
+            setPositiveButton(android.R.string.ok) { _, _ -> callback.invoke()}
             setCancelable(true)
             show()
         }
@@ -74,9 +111,21 @@ class UserInfoActivity<fragment> : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
     }
 
+    private fun requestGalleryPermission(){
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), GALLERY_PERMISSION_CODE)
+    }
+
     private fun openCamera(){
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE)
+    }
+
+    private fun openGallery(){
+        val galleryIntent = Intent(Intent.ACTION_PICK)
+        galleryIntent.type = "image/*"
+        startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
+
+
     }
 
     override fun onRequestPermissionsResult(
@@ -94,21 +143,22 @@ class UserInfoActivity<fragment> : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        handlePhotoTaken(data)
+
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val bitmap = data?.extras?.get("data") as? Bitmap
+            if (bitmap != null) {
+                handlePhotoTaken(bitmap)
+            }
+        } else if (requestCode == GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data as? Uri
+            val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+            handlePhotoTaken(bitmap)
+        }
     }
 
-    private fun handlePhotoTaken(data: Intent?) {
-        val image = data?.extras?.get("data") as? Bitmap
-        val imageBody = imageToBody(image)
-
-        Glide.with(this).load(image)
-            .circleCrop()
-            .override(500, 500)
-            .into(image_view_act)
-
-
+    private fun handlePhotoTaken(bitmap: Bitmap) {
+        val imageBody = imageToBody(bitmap)
         viewModel.updateAvatar(imageBody)
-
     }
 
 
@@ -130,9 +180,17 @@ class UserInfoActivity<fragment> : AppCompatActivity() {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadInfos()
+    }
+
+
 
     companion object {
         const val CAMERA_PERMISSION_CODE = 42
         const val CAMERA_REQUEST_CODE = 201
+        const val GALLERY_REQUEST_CODE = 69
+        const val GALLERY_PERMISSION_CODE = 66
     }
 }
