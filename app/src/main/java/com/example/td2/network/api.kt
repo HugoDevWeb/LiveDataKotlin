@@ -4,12 +4,12 @@ import com.example.td2.TaskService
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.GET
-
+import retrofit2.http.*
 
 
 object Api {
@@ -49,5 +49,12 @@ object Api {
 interface UserService{
     @GET("users/info")
     suspend fun getInfo() : Response<UserInfo>
+
+    @Multipart
+    @PATCH("users/update_avatar")
+    suspend fun updateAvatar(@Part avatar: MultipartBody.Part): Response<UserInfo>
+
+    @PATCH("users")
+    suspend fun update(@Body user: UserInfo): Response<UserInfo>
 }
 

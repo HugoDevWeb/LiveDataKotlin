@@ -31,10 +31,12 @@ class TasksFragment : Fragment() {
                               container: ViewGroup?,
                               savedInstanceState: Bundle?)
             : View? {
+
         return inflater.inflate(R.layout.fragment_tasks, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
         viewModel.taskListLiveData.observe(this, Observer { newList ->
             tasksAdapter.list = newList.orEmpty()
             tasksAdapter.notifyDataSetChanged()
@@ -63,6 +65,7 @@ class TasksFragment : Fragment() {
 
 
         val intent = Intent(activity, TaskActivity::class.java)
+        val userInfoIntent = Intent(activity, UserInfoActivity::class.java)
 
         tasksAdapter.onEditClickListener = {
 
@@ -77,6 +80,9 @@ class TasksFragment : Fragment() {
         button_intent.setOnClickListener {
 
             startActivityForResult(intent, ADD_TASK_REQUEST_CODE)
+        }
+        img_api.setOnClickListener{
+            startActivity(userInfoIntent)
         }
 
 
@@ -119,7 +125,7 @@ class TasksFragment : Fragment() {
         lifecycleScope.launch {
             val userInfo = Api.userService.getInfo().body()
             text_api.text = "${userInfo?.firstname} ${userInfo?.lastname}"
-            glide.load("https://goo.gl/gEgYUd")
+            glide.load(userInfo?.avatar)
                 .circleCrop()
                 .override(500, 500)
                 .into(img_api)

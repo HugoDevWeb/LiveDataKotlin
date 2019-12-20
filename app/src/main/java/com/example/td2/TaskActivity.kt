@@ -20,6 +20,7 @@ class TaskActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.edit_task)
 
+
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
             edit_description.setText(it)
         }
