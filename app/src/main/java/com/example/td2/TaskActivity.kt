@@ -28,7 +28,7 @@ class TaskActivity : AppCompatActivity()
 
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, "Nique bien ta race pd, ceci est un message envoyé de mon application kotlin fils de pute ferme bien ta chatte")
+            putExtra(Intent.EXTRA_TEXT, "Ceci est un message test provenant de l'appli kotlin")
             type = "text/plain"
         }
 

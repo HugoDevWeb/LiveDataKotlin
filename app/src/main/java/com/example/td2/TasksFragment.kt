@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.td2.network.Api
@@ -17,9 +19,13 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import retrofit2.http.*
+import java.util.*
 
 class TasksFragment : Fragment() {
-
+    val tasksAdapter = TasksAdapter()
+    private val viewModel by lazy {
+        ViewModelProvider(this).get(TasksViewModel::class.java)
+    }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -28,32 +34,19 @@ class TasksFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_tasks, container, false)
     }
 
-
-    private val tasksRepository = TasksRepository()
-    private val tasks = mutableListOf<Task>()
-
-
-
-    val tasksAdapter = TasksAdapter(tasks)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        tasksAdapter.onDeleteClickListener = { task ->
-            tasksRepository.deleteTask(task.id).observe(this, Observer { success ->
-                if (success) {
-                    tasks.remove(task)
-                    tasksAdapter.notifyDataSetChanged()
-                }
-
+        viewModel.taskListLiveData.observe(this, Observer { newList ->
+            tasksAdapter.list = newList.orEmpty()
+            tasksAdapter.notifyDataSetChanged()
         })
 
 
-        }
         add_button.setOnClickListener {
-            tasks.add(Task(id = "${tasks.count()}", title = "task # ${tasks.count() + 1}"))
+            viewModel.addTask(Task(title = "task # ${tasksAdapter.list.count() + 1}"))
             tasksAdapter.notifyDataSetChanged()
-            recycler_view_td2.scrollToPosition(tasks.count()-1)
+            recycler_view_td2.scrollToPosition(tasksAdapter.list.count()-1)
         }
+
         add_button_arouf.setOnClickListener {
             Glide.with(it)
                 .load("https://lastfm.freetls.fastly.net/i/u/avatar170s/3bedd9d81f7bdec4b5bae8397618d546")
@@ -62,11 +55,11 @@ class TasksFragment : Fragment() {
                 .into(image_scroll)
             tasksAdapter.notifyDataSetChanged()
         }
+
         recycler_view_td2.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = tasksAdapter
         }
-
 
 
         val intent = Intent(activity, TaskActivity::class.java)
@@ -77,17 +70,18 @@ class TasksFragment : Fragment() {
             startActivityForResult(intent, EDIT_TASK_REQUEST_CODE)
         }
 
+        tasksAdapter.onDeleteClickListener = {
+            viewModel.deleteTask(it)
+        }
+
         button_intent.setOnClickListener {
 
             startActivityForResult(intent, ADD_TASK_REQUEST_CODE)
         }
 
 
-
-
-
-
     }
+
 
 
 
@@ -96,17 +90,14 @@ class TasksFragment : Fragment() {
         if (requestCode == ADD_TASK_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 val task = data!!.getSerializableExtra(TaskActivity.TASK_KEY) as Task
-                tasks.add(task)
-                tasksAdapter.notifyDataSetChanged()
+                viewModel.addTask(task)
             }
         }
 
         if (requestCode == EDIT_TASK_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 val task = data!!.getSerializableExtra(TaskActivity.TASK_KEY) as Task
-                val index = tasks.indexOfFirst { it.id == task.id }
-                tasks[index] = task
-                tasksAdapter.notifyItemChanged(index)
+                viewModel.editTask(task)
             }
         }
     }
@@ -120,20 +111,21 @@ class TasksFragment : Fragment() {
 
 
 
+
     override fun onResume() {
         super.onResume()
-        val coroutineScopeLaunch = MainScope().launch {
+        val glide = Glide.with(this)
+        viewModel.loadTasks()
+        lifecycleScope.launch {
             val userInfo = Api.userService.getInfo().body()
             text_api.text = "${userInfo?.firstname} ${userInfo?.lastname}"
+            glide.load("https://goo.gl/gEgYUd")
+                .circleCrop()
+                .override(500, 500)
+                .into(img_api)
+
         }
 
-        tasksRepository.getTasks().observe(this, Observer {
-            if (it != null) {
-                tasks.clear()
-                tasks.addAll(it)
-                tasksAdapter.notifyDataSetChanged()
-            }
-        })
     }
 
 }
@@ -146,11 +138,11 @@ interface TaskService {
     suspend fun getTasks(): Response<List<Task>>
 
     @DELETE("tasks/{id}")
-    suspend fun deleteTask(@Path("id") id: String): Response<String>
+    suspend fun deleteTask(@Path("id") id: String?): Response<String>
 
     @POST("tasks")
     suspend fun createTask(@Body task: Task): Response<Task>
 
     @PATCH("tasks/{id}")
-    suspend fun updateTask(@Body task: Task, @Path("id") id: String = task.id): Response<Task>
+    suspend fun updateTask(@Body task: Task, @Path("id") id: String? = task.id): Response<Task>
 }

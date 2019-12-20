@@ -4,21 +4,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_task.view.*
 
-class TasksAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TasksAdapter.TaskViewHolder>() {
+
+
+class TasksAdapter() : RecyclerView.Adapter<TasksAdapter.TaskViewHolder>() {
+
+
+    var list: List<Task> = emptyList()
+
+
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
 
-        val task = tasks[position]
+        val task = list[position]
         holder.bind(task)
 
 
     }
 
+
+
     override fun getItemCount(): Int {
-        return tasks.size
+        return list.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -33,7 +43,6 @@ class TasksAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TasksAd
             itemView.task_description.text = task.description
             itemView.delete_button.setOnClickListener{onDeleteClickListener.invoke(task)}
             itemView.edit_button.setOnClickListener{onEditClickListener.invoke(task)}
-
 
         }
 
