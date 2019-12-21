@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide
 import com.example.td2.network.Api
 import kotlinx.android.synthetic.main.fragment_tasks.*
 import kotlinx.android.synthetic.main.item_task.*
+import kotlinx.android.synthetic.main.new_user_info_act.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -123,7 +124,7 @@ class TasksFragment : Fragment() {
         val glide = Glide.with(this)
         viewModel.loadTasks()
         lifecycleScope.launch {
-            val userInfo = Api.userService.getInfo().body()
+            val userInfo = Api.INSTANCE.userService.getInfo().body()
             text_api.text = "${userInfo?.firstname} ${userInfo?.lastname} "
             glide.load(userInfo?.avatar)
                 .circleCrop()

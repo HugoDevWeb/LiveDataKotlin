@@ -3,7 +3,7 @@ package com.example.td2
 import com.example.td2.network.Api
 
 class TasksRepository {
-    private val taskService = Api.taskService
+    private val taskService = Api.INSTANCE.taskService
 
 
 

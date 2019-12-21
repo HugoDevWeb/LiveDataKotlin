@@ -7,7 +7,7 @@ import okhttp3.MultipartBody
 class UserInfoRepository {
 
 
-    private val userService = Api.userService
+    private val userService = Api.INSTANCE.userService
 
     suspend fun loadInfos(): UserInfo? {
         val userResponse = userService.getInfo()

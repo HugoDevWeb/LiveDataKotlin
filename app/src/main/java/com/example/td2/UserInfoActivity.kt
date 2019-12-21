@@ -32,6 +32,7 @@ class UserInfoActivity<fragment> : AppCompatActivity() {
     }
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.new_user_info_act)

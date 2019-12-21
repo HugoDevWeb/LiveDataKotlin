@@ -1,6 +1,10 @@
 package com.example.td2.network
 
+import android.content.Context
+import com.example.td2.LoginForm
+import com.example.td2.SignupForm
 import com.example.td2.TaskService
+import com.example.td2.TokenResponse
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -12,9 +16,13 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 
 
-object Api {
-    private const val BASE_URL = "https://android-tasks-api.herokuapp.com/api/"
-    private const val TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1NSwiZXhwIjoxNjA4MjExNjQzfQ.sVppuez0fq_c3h-3wuBNJntA3rXHQNFW5aqhnxYutpY"
+class Api(private val context: Context) {
+    companion object{
+        private const val BASE_URL = "https://android-tasks-api.herokuapp.com/api/"
+        const val TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1NSwiZXhwIjoxNjA4MjExNjQzfQ.sVppuez0fq_c3h-3wuBNJntA3rXHQNFW5aqhnxYutpY"
+        lateinit var INSTANCE: Api
+    }
+
 
     private val moshi = Moshi.Builder().build()
 
@@ -56,5 +64,11 @@ interface UserService{
 
     @PATCH("users")
     suspend fun update(@Body user: UserInfo): Response<UserInfo>
+
+    @POST("users/login")
+    suspend fun login(@Body user: LoginForm): Response<TokenResponse>
+
+    @POST("users/sign_up")
+    suspend fun signUp(@Body user: SignupForm): Response<TokenResponse>
 }
 

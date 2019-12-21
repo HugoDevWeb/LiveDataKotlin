@@ -21,5 +21,9 @@
     <string name="insert_your_mail_adress">Insert your mail adress</string>
     <string name="insert_your_password">Insert your password</string>
     <string name="confirm_your_password">Confirm your password</string>
-    <string name="SignUp">Button</string>
+    <string name="authentication">Authentication</string>
+    <string name="password">Password</string>
+    <string name="user_name">User Name</string>
+    <string name="reset">Reset</string>
+    <string name="submit">Submit</string>
 </resources>
