@@ -2,12 +2,14 @@ package com.example.td2
 
 
 import SHARED_PREF_TOKEN_KEY
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.example.td2.network.Api
@@ -45,16 +47,20 @@ class SignupFragment : Fragment() {
         val email = signup_email.text.toString()
         val password = signup_password.text.toString()
         val confirmPassword = signup_confirm_password.text.toString()
-
+        val intent = Intent(activity, AuthenticationActivity::class.java)
 
         val user = SignupForm(firstname = firstname, lastname = lastname, email = email, password = password, confirmPassword = confirmPassword)
 
         if (firstname != "" && lastname != "" && email != "" && password != "" && confirmPassword != "" ){
             if (confirmPassword == password) {
                 lifecycleScope.launch {
-                    userService.signUp(user)
-                    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(SHARED_PREF_TOKEN_KEY, Api.TOKEN).apply()
+                    val user = userService.signUp(user)
+                    PreferenceManager.getDefaultSharedPreferences(context).edit {
+                        putString(SHARED_PREF_TOKEN_KEY, user.body()?.token.toString())
+                    }
                 }
+                startActivity(intent)
+                Toast.makeText(context, "Votre compte a bien été créé", Toast.LENGTH_LONG).show()
             } else {
                 Toast.makeText(context, "Impossible de créer ce compte, veuillez vérifier les informations", Toast.LENGTH_LONG).show()
             }

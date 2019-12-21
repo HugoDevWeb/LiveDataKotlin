@@ -1,12 +1,14 @@
 package com.example.td2
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import com.example.td2.network.Api
 import kotlinx.android.synthetic.main.fragment_authentication.*
 
 /**
@@ -25,6 +27,10 @@ class AuthenticationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val i = Intent(activity, MainActivity::class.java)
+        if (Api.INSTANCE.getToken() != null){
+            startActivity(i)
+        }
         login.setOnClickListener{
             findNavController().navigate(R.id.action_authenticationFragment_to_loginFragment)
         }

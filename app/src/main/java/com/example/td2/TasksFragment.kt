@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -125,13 +126,23 @@ class TasksFragment : Fragment() {
         viewModel.loadTasks()
         lifecycleScope.launch {
             val userInfo = Api.INSTANCE.userService.getInfo().body()
+            var load = userInfo?.avatar
             text_api.text = "${userInfo?.firstname} ${userInfo?.lastname} "
-            glide.load(userInfo?.avatar)
+            if (userInfo?.avatar == null){
+                load = "https://goo.gl/gEgYUd"
+
+            }
+            glide.load(load)
                 .circleCrop()
                 .override(500, 500)
                 .into(img_api)
 
+            Toast.makeText(context, "Bonjour ${userInfo?.firstname}", Toast.LENGTH_LONG).show()
+
         }
+
+
+
 
     }
 

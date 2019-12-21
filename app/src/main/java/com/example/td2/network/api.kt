@@ -1,6 +1,9 @@
 package com.example.td2.network
 
+import SHARED_PREF_TOKEN_KEY
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import com.example.td2.LoginForm
 import com.example.td2.SignupForm
 import com.example.td2.TaskService
@@ -17,10 +20,15 @@ import retrofit2.http.*
 
 
 class Api(private val context: Context) {
+
     companion object{
         private const val BASE_URL = "https://android-tasks-api.herokuapp.com/api/"
-        const val TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1NSwiZXhwIjoxNjA4MjExNjQzfQ.sVppuez0fq_c3h-3wuBNJntA3rXHQNFW5aqhnxYutpY"
+
         lateinit var INSTANCE: Api
+    }
+
+    fun getToken(){
+        PreferenceManager.getDefaultSharedPreferences(context).getString(SHARED_PREF_TOKEN_KEY, "")
     }
 
 
@@ -29,8 +37,8 @@ class Api(private val context: Context) {
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor{
-                chain -> val newRequest = chain.request().newBuilder()
-                .addHeader("Authorization", "Baerer $TOKEN").build()
+                    chain -> val newRequest = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer ${getToken()}").build()
                 chain.proceed(newRequest)
             } .build()
 
